@@ -40,7 +40,7 @@ impl Default for Person {
 // If while parsing the age, something goes wrong, then return the default of
 // Person Otherwise, then return an instantiated Person object with the results
 
-// I AM NOT DONE
+
 
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
@@ -49,25 +49,41 @@ impl From<&str> for Person {
         }
 
         let mut p = s.split(",");
+        if p.clone().count() != 2 {
+            return Person::default();
+        }
         let n = p.nth(0).unwrap().to_string();
 
         if n.len() == 0 {
             return Person::default();
         }
 
-        let a = p.nth(1).unwrap().parse().unwrap();
-        Person {name: n, age: a,}
+        if let Ok(a) = p.nth(0).unwrap().parse() {
+            return Person {name: n, age: a,};
+        }
+        
+        return Person::default();
 
     }
 }
+
+impl From<u32> for Person {
+    fn from(n: u32) -> Self {
+        Person::default()
+    }
+}
+
 
 fn main() {
     // Use the `from` function
     let p1 = Person::from("Mark,20");
     // Since From is implemented for Person, we should be able to use Into
     let p2: Person = "Gerald,70".into();
+
     println!("{:?}", p1);
     println!("{:?}", p2);
+    let p3 = Person::from(p1);
+    let p4: Person = p2.into();
 }
 
 #[cfg(test)]
@@ -148,6 +164,13 @@ mod tests {
     #[test]
     fn test_trailing_comma_and_some_string() {
         let p: Person = Person::from("Mike,32,man");
+        assert_eq!(p.name, "John");
+        assert_eq!(p.age, 30);
+    }
+
+    #[test]
+    fn test_from_num() {
+        let p: Person = Person::from(0);
         assert_eq!(p.name, "John");
         assert_eq!(p.age, 30);
     }
